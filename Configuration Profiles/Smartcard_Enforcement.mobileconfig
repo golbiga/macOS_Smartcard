@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>PayloadDescription</key>
+			<string></string>
+			<key>PayloadDisplayName</key>
+			<string>SmartCard</string>
+			<key>PayloadEnabled</key>
+			<true/>
+			<key>PayloadIdentifier</key>
+			<string>com.github.golbiga.enforcesmartcard</string>
+			<key>PayloadType</key>
+			<string>com.apple.security.smartcard</string>
+			<key>PayloadUUID</key>
+			<string>3B1F6BBC-46B1-4F29-B4A4-4218F34F0E9A</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>UserPairing</key>
+			<false/>
+			<key>allowSmartCard</key>
+			<true/>
+			<key>checkCertificateTrust</key>
+			<integer>2</integer>
+			<key>oneCardPerUser</key>
+			<false/>
+			<key>enforceSmartCard</key>
+			<true/>
+			<key>allowUnmappedUsers</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Settings for Smartcard Enforcement</string>
+	<key>PayloadDisplayName</key>
+	<string>Smartcard Enforcement</string>
+	<key>PayloadEnabled</key>
+	<true/>
+	<key>PayloadIdentifier</key>
+	<string>com.apple.security.smartcard.F0CD5977-CEF1-4001-B572-928438C49840</string>
+	<key>PayloadOrganization</key>
+	<string/>
+	<key>PayloadRemovalDisallowed</key>
+	<true/>
+	<key>PayloadScope</key>
+	<string>System</string>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>F0CD5977-CEF1-4001-B572-928438C49840</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>
