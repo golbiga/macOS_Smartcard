@@ -85,7 +85,7 @@ if [ ! -f /etc/SmartcardLogin.plist ];then
 		  <string></string>
 	   </array>
      <key>NotEnforcedGroup</key>
-     <string></key>
+     <string></string>
 </dict>
 </plist>
 Attr_Mapping
