@@ -80,6 +80,12 @@ if [ ! -f /etc/SmartcardLogin.plist ];then
           <key>dsAttributeString</key>
           <string>dsAttrTypeStandard:AltSecurityIdentities</string>
      </dict>
+     <key>TrustedAuthorities</key>
+	   <array>
+		  <string></string>
+	   </array>
+     <key>NotEnforcedGroup</key>
+     <string></string>
 </dict>
 </plist>
 Attr_Mapping
