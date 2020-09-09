@@ -4,7 +4,7 @@
 loggedInUser="$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )"
 
 # Get SHA1 from export-smartcard gibberish
-sha1=$(/usr/bin/security export-smartcard -t certs | awk '/certificate #1/,/certificate #2/' | grep sha1 | head -n1| cut -d'<' -f2 | sed "s/[ >]//g")
+sha1=$(/usr/bin/security export-smartcard -t certs | awk '/Certificate For PIV Authentication/,/sha1/' | grep sha1 | head -n1| cut -d'<' -f2 | sed "s/[ >]//g")
 
 # Prompt user for Service Name, default is *.domain.com
 prompt () {
