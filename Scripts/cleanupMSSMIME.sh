@@ -29,7 +29,7 @@ system_profiler SPSmartCardsDataType | grep -A5 "$hash" | awk '/-----BEGIN CERTI
 cn=$(openssl x509 -noout -subject -in /tmp/temp.pem | sed -n '/^subject/s/^.*CN=//p')
 
 # Microsoft db Hash List
-loginhashlist=$(/usr/bin/security find-certificate -a -m -Z /Users/"$currentUser"/Library/Keychains/Microsoft_Entity_Certificates-db | grep -E 'SHA-1|email' | awk '/nasa.gov/ {print x}; { x=$NF}')
+loginhashlist=$(/usr/bin/security find-certificate -a -m -Z /Users/"$currentUser"/Library/Keychains/Microsoft_Entity_Certificates-db | grep -E 'SHA-1|email' | awk '/DOMAIN.COM/ {print x}; { x=$NF}')
 
 # User Hash List
 userhashlist=$(/usr/bin/security find-certificate -c "$cn" -a -Z /Users/"$currentUser"/Library/Keychains/Microsoft_Entity_Certificates-db | grep SHA-1 | awk '{print $NF}')
