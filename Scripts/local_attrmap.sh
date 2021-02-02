@@ -1,5 +1,15 @@
 #!/bin/sh
 
+# Save current IFS state
+
+OLDIFS=$IFS
+
+IFS='.' read osvers_major osvers_minor osvers_dot_version <<< "$(/usr/bin/sw_vers -productVersion)"
+
+# restore IFS to previous state
+
+IFS=$OLDIFS
+
 # Check for logged in user.
 currentUser="$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )"
 
@@ -26,7 +36,7 @@ getUPN(){
 # Get the PIV Identity Hash
 osVers="$(/usr/bin/sw_vers -productVersion | /usr/bin/cut -d '.' -f 2)"
 
-if [[ "$osVers" -gt 14 ]]; then
+if [[ ( ${osvers_major} -eq 10 && ${osvers_minor} -ge 14 ) || ( ${osvers_major} -eq 11 && ${osvers_minor} -ge 0 ) ]]; then
 	# Get the PIV Identity Hash
 	hash="$(sc_auth identities 2>/dev/null| awk '/PIV/ {print $1}' | tr '[:upper:]' '[:lower:]')"
 else
