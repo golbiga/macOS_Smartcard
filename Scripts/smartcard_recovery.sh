@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #Smartcard Recovery for macOS 10.15+
-#rev:1.0
+#rev:1.0.1
 
 # Save current IFS state
 
@@ -19,8 +19,13 @@ userPrompt="Please enter the account that needs to be added to NotEnforced: "
 printf "\e[1m$userPrompt"
 read uid     
 
-# Check for Boot Volume Name. User may have changed from Macintosh HD
-bootVolumeName=$(/usr/sbin/bless --info | /usr/bin/grep blessed | /usr/bin/head -1 | /usr/bin/cut -d'"' -f2)
+# Check for Boot Volume Name. User may have changed from Macintosh HD. 
+arch=$(/usr/bin/arch)
+if [[ "$arch" == "arm64" ]]; then
+    bootVolumeName=$(/usr/sbin/bless --info 2>&1 >/dev/null |  awk -F': ' '/^mount/{print $2}')
+else
+    bootVolumeName=$(/usr/sbin/bless --info | /usr/bin/grep blessed | /usr/bin/head -1 | /usr/bin/cut -d'"' -f2)
+fi
 
 # Check for notEnforced file in mapping file
 notEnforced=$("$bootVolumeName"/usr/libexec/Plistbuddy -c "Print NotEnforcedGroup" "$bootVolumeName"/private/etc/Smartcardlogin.plist 2>/dev/null)
