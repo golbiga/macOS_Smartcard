@@ -10,10 +10,10 @@ adobe_reader () {
     echo "Working in $userHome"
     /usr/libexec/PlistBuddy -c "Delete :DC:Security:ASPKI:1:CTK" $userHome/Library/Preferences/com.adobe.Reader.plist
     /usr/libexec/PlistBuddy -c "Add :DC:Security:ASPKI:1:CTK array" $userHome/Library/Preferences/com.adobe.Reader.plist
-    /usr/libexec/PlistBuddy -c "Add :DC:Security:ASPKI:1:CTK: real 8" $userHome/Library/Preferences/com.adobe.Reader.plist
+    /usr/libexec/PlistBuddy -c "Add :DC:Security:ASPKI:1:CTK: integer 8" $userHome/Library/Preferences/com.adobe.Reader.plist
     /usr/libexec/PlistBuddy -c "Add :DC:Security:ASPKI:1:CTK: Dict" $userHome/Library/Preferences/com.adobe.Reader.plist
     /usr/libexec/PlistBuddy -c "Add :DC:Security:ASPKI:1:CTK:1:EnableCTK Array" $userHome/Library/Preferences/com.adobe.Reader.plist
-    /usr/libexec/PlistBuddy -c "Add :DC:Security:ASPKI:1:CTK:1:EnableCTK: real 0" $userHome/Library/Preferences/com.adobe.Reader.plist
+    /usr/libexec/PlistBuddy -c "Add :DC:Security:ASPKI:1:CTK:1:EnableCTK: integer 0" $userHome/Library/Preferences/com.adobe.Reader.plist
     /usr/libexec/PlistBuddy -c "Add :DC:Security:ASPKI:1:CTK:1:EnableCTK: bool yes" $userHome/Library/Preferences/com.adobe.Reader.plist
 }
 #Function to update Adobe Acrobat
@@ -21,10 +21,10 @@ adobe_acrobat () {
     echo "Working in $userHome"
     /usr/libexec/PlistBuddy -c "Delete :DC:Security:ASPKI:1:CTK" $userHome/Library/Preferences/com.adobe.Acrobat.Pro.plist
     /usr/libexec/PlistBuddy -c "Add :DC:Security:ASPKI:1:CTK array" $userHome/Library/Preferences/com.adobe.Acrobat.Pro.plist
-    /usr/libexec/PlistBuddy -c "Add :DC:Security:ASPKI:1:CTK: real 8" $userHome/Library/Preferences/com.adobe.Acrobat.Pro.plist
+    /usr/libexec/PlistBuddy -c "Add :DC:Security:ASPKI:1:CTK: integer 8" $userHome/Library/Preferences/com.adobe.Acrobat.Pro.plist
     /usr/libexec/PlistBuddy -c "Add :DC:Security:ASPKI:1:CTK: Dict" $userHome/Library/Preferences/com.adobe.Acrobat.Pro.plist
     /usr/libexec/PlistBuddy -c "Add :DC:Security:ASPKI:1:CTK:1:EnableCTK Array" $userHome/Library/Preferences/com.adobe.Acrobat.Pro.plist
-    /usr/libexec/PlistBuddy -c "Add :DC:Security:ASPKI:1:CTK:1:EnableCTK: real 0" $userHome/Library/Preferences/com.adobe.Acrobat.Pro.plist
+    /usr/libexec/PlistBuddy -c "Add :DC:Security:ASPKI:1:CTK:1:EnableCTK: integer 0" $userHome/Library/Preferences/com.adobe.Acrobat.Pro.plist
     /usr/libexec/PlistBuddy -c "Add :DC:Security:ASPKI:1:CTK:1:EnableCTK: bool yes" $userHome/Library/Preferences/com.adobe.Acrobat.Pro.plist
 }
 
