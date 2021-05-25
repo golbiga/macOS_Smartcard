@@ -7,7 +7,7 @@ pivAvail=$(/usr/bin/security list-smartcards 2>/dev/null | grep -c com.apple.piv
 if [[ "$pivAvail" -lt "1" ]]; then 
     result=$(defaults read /Library/Preferences/com.company.certInfo enddate 2>/dev/null)
     if [[ -z "$result" ]]; then
-        echo "<result>Smartcard Not Preset, Value Not Set</result>"
+        echo "<result>Smartcard Not Present, Value Not Set</result>"
     else    
         echo "<result>$result</result>"
     fi
