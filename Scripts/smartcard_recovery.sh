@@ -31,7 +31,7 @@ fi
 notEnforced=$("$bootVolumeName"/usr/libexec/Plistbuddy -c "Print NotEnforcedGroup" "$bootVolumeName"/private/etc/Smartcardlogin.plist 2>/dev/null)
 
 # If macOS is 10.15 or higher, create both launchdaemons
-if [[ ( ${osvers_major} -eq 10 && ${osvers_minor} -ge 15 ) || ( ${osvers_major} -eq 11 && ${osvers_minor} -ge 0 ) ]]; then
+if [[ ( ${osvers_major} -eq 10 && ${osvers_minor} -ge 15 ) || ( ${osvers_major} -ge 11 && ${osvers_minor} -ge 0 ) ]]; then
     if [[ -z "$notEnforced" ]]; then
         echo "NotEnforcedGroup is not set. Please contact your admin."
         exit 1

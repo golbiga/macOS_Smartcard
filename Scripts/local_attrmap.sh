@@ -34,7 +34,7 @@ prompt (){
 
 getUPN(){
 # Get the PIV Identity Hash
-if [[ ( ${osvers_major} -eq 10 && ${osvers_minor} -ge 15 ) || ( ${osvers_major} -eq 11 && ${osvers_minor} -ge 0 ) ]]; then
+if [[ ( ${osvers_major} -eq 10 && ${osvers_minor} -ge 15 ) || ( ${osvers_major} -ge 11 && ${osvers_minor} -ge 0 ) ]]; then
 	# Get the PIV Identity Hash
 	hash="$(sc_auth identities 2>/dev/null| awk '/PIV/ {print $1}' | tr '[:upper:]' '[:lower:]')"
 else
