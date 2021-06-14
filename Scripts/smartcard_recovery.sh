@@ -20,12 +20,7 @@ printf "\e[1m$userPrompt"
 read uid     
 
 # Check for Boot Volume Name. User may have changed from Macintosh HD. 
-arch=$(/usr/bin/arch)
-if [[ "$arch" == "arm64" ]]; then
-    bootVolumeName=$(/usr/sbin/bless --info 2>&1 >/dev/null |  awk -F': ' '/^mount/{print $2}')
-else
-    bootVolumeName=$(/usr/sbin/bless --info | /usr/bin/grep blessed | /usr/bin/head -1 | /usr/bin/cut -d'"' -f2)
-fi
+bootVolumeName=$(/usr/sbin/bless --info --verbose 2>&1 >/dev/null |  awk -F': ' '/^mount/{print $2}')
 
 # Check for notEnforced file in mapping file
 notEnforced=$("$bootVolumeName"/usr/libexec/Plistbuddy -c "Print NotEnforcedGroup" "$bootVolumeName"/private/etc/Smartcardlogin.plist 2>/dev/null)
