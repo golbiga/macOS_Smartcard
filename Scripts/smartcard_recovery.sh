@@ -1,70 +1,43 @@
 #!/bin/sh
 
-#Smartcard Recovery for macOS 10.15+
-#rev:1.0.1
+#Smartcard Recovery for macOS 10.15.7+
+#rev:2.1
 
-# Save current IFS state
-
-OLDIFS=$IFS
-
-IFS='.' read osvers_major osvers_minor osvers_dot_version <<< "$(/usr/bin/sw_vers -productVersion)"
-
-# restore IFS to previous state
-
-IFS=$OLDIFS
-
-# Prompt user for account name
-userPrompt="Please enter the account that needs to be added to NotEnforced: "
+# Prompt user for account name:
+userPrompt="Please enter the account that requires an exemption from smartcard enforcement: "
 
 printf "\e[1m$userPrompt"
-read uid     
+read uid
 
-# Check for Boot Volume Name. User may have changed from Macintosh HD. 
+# Check for Boot Volume Name. User may have changed from Macintosh HD:
 bootVolumeName=$(/usr/sbin/bless --info --verbose 2>&1 >/dev/null |  awk -F': ' '/^mount/{print $2}')
-
-# Check for notEnforced file in mapping file
-notEnforced=$("$bootVolumeName"/usr/libexec/Plistbuddy -c "Print NotEnforcedGroup" "$bootVolumeName"/private/etc/Smartcardlogin.plist 2>/dev/null)
-
-# If macOS is 10.15 or higher, create both launchdaemons
-if [[ ( ${osvers_major} -eq 10 && ${osvers_minor} -ge 15 ) || ( ${osvers_major} -ge 11 && ${osvers_minor} -ge 0 ) ]]; then
-    if [[ -z "$notEnforced" ]]; then
-        echo "NotEnforcedGroup is not set. Please contact your admin."
-        exit 1
-    else
-        echo "Adding '$uid' to NotEnforcedGroup. Please Reboot. :-)"
-        createLaunchDaemon (){
-        local launch_daemon="com.company.smartcard.notenforced"
-        local launch_daemon_path="$bootVolumeName/Library/LaunchDaemons/$launch_daemon".plist
-
-echo "<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>Label</key>
-  <string>$launch_daemon</string>
-  <key>ProgramArguments</key>
-  <array>
-    <string>/bin/sh</string>
-    <string>-c</string>
-    <string>/usr/sbin/dseditgroup -o edit -a '$uid' -t user '$notEnforced'; /bin/rm -f /Library/LaunchDaemons/'$launch_daemon'.plist; /bin/launchctl bootout system/'$launch_daemon'</string>
-  </array>
-  <key>RunAtLoad</key>
-  <true/>
-</dict>
-</plist>" > "$launch_daemon_path"
-# Set proper permissions on launch daemon
-if [[ -e "$launch_daemon_path" ]]; then
-    /usr/sbin/chown root:wheel "$launch_daemon_path"
-    /bin/chmod 644 "$launch_daemon_path"
+if [[ -z "$bootVolumeName" ]]; then
+    echo "Boot Volume not found. Please verify using the Startup Disk menu bar item and try again."
+    exit 1
 fi
-}
-        echo "Creating removal script"
-        createRemovalLaunchDaemon (){
-        local launch_daemon="com.company.smartcard.removenotenforced"
-        local launch_daemon_path="$bootVolumeName/Library/LaunchDaemons/$launch_daemon".plist
+
+# Check if user is already exempt:
+userExempt=$(/usr/bin/defaults read "$bootVolumeName"/var/db/dslocal/nodes/Default/users/"$uid" SmartCardEnforcement | /usr/bin/awk 'NR==2' | /usr/bin/sed 's/^[ \t]*//')
+if [[ "$userExempt" == "2" ]]; then
+  echo "$uid is already exempt."
+  exit 0
+fi
+
+# Disable SmartCardEnforcement by setting it in User account:
+/usr/bin/defaults write "$bootVolumeName"/var/db/dslocal/nodes/Default/users/"$uid" SmartCardEnforcement -array-add 2
+
+# Disable SmartCardEnforcement by setting it in User account:
+if [[ "$arch" == "arm64" ]]; then
+    /usr/sbin/diskutil apfs updatePreboot "$bootVolumeName" >/dev/null
+fi
+
+# Create a LaunchDaemon to remove the SmartCardEnforcement attribute from the acount
+# Exemption is removed after 1 hour
+createRemovalLaunchDaemon (){
+local launch_daemon="com.company.smartcard.exemption"
+local launch_daemon_path="$bootVolumeName/Library/LaunchDaemons/$launch_daemon".plist
 
 echo "<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
   <key>Label</key>
@@ -73,19 +46,18 @@ echo "<?xml version="1.0" encoding="UTF-8"?>
   <array>
     <string>/bin/sh</string>
     <string>-c</string>
-    <string>/usr/sbin/dseditgroup -o edit -d '$uid' -t user '$notEnforced'; /bin/rm -f /Library/LaunchDaemons/'$launch_daemon'.plist; /bin/launchctl bootout system/'$launch_daemon'</string>
+    <string>/usr/bin/dscl . -delete /Users/'$uid' SmartCardEnforcement; /bin/rm -f /Library/LaunchDaemons/'$launch_daemon'.plist; /bin/launchctl bootout system/'$launch_daemon'</string>
   </array>
   <key>StartInterval</key>
   <integer>3600</integer>
 </dict>
 </plist>" > "$launch_daemon_path"
-# Set proper permissions on launch daemon
+# Set proper permissions on launchdaemon:
 if [[ -e "$launch_daemon_path" ]]; then
     /usr/sbin/chown root:wheel "$launch_daemon_path"
     /bin/chmod 644 "$launch_daemon_path"
 fi
-}       
-    createLaunchDaemon
-    createRemovalLaunchDaemon
-    fi
-fi
+}
+
+createRemovalLaunchDaemon
+echo "$uid is now exempt for 1 hour. Please Reboot."
