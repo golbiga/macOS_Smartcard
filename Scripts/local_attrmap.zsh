@@ -1,14 +1,6 @@
-#!/bin/sh
+#!/bin/zsh
 
-# Save current IFS state
-
-OLDIFS=$IFS
-
-IFS='.' read osvers_major osvers_minor osvers_dot_version <<< "$(/usr/bin/sw_vers -productVersion)"
-
-# restore IFS to previous state
-
-IFS=$OLDIFS
+# Smartcard Attribute Mapping for Local Accounts 
 
 # Check for logged in user.
 currentUser="$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )"
@@ -33,26 +25,21 @@ prompt (){
 }
 
 getUPN(){
-# Get the PIV Identity Hash
-if [[ ( ${osvers_major} -eq 10 && ${osvers_minor} -ge 15 ) || ( ${osvers_major} -ge 11 && ${osvers_minor} -ge 0 ) ]]; then
-	# Get the PIV Identity Hash
-	hash="$(sc_auth identities 2>/dev/null| awk '/PIV/ {print $1}' | tr '[:upper:]' '[:lower:]')"
-else
-	hash="$(sc_auth identities 2>/dev/null| awk '/PIV/ {print $1}' | tr '[:upper:]' '[:lower:]' | sed 's/.\{8\}/& /g' | sed 's/.$//g')"
-fi
+# Create temporary directory to export certs:
+tmpdir=$(/usr/bin/mktemp -d)
 
-# Extract the certificate associated with that hash to the temp folder.
-system_profiler SPSmartCardsDataType | grep -A5 "$hash" | awk '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/{print; count++; if (count==3) exit}' | fold -w67 > /tmp/temp.pem
+# Export certs on smartcard to temporary directory:
+/usr/bin/security export-smartcard -e "$tmpdir"
 
-echo ""
+# Get path to Certificate for PIV Authentication:
+piv_path=$(ls "$tmpdir" | /usr/bin/grep '^Certificate For PIV')
 
-echo "Getting UPN"
-UPN="$(openssl asn1parse -i -dump -in /tmp/temp.pem -strparse $(openssl asn1parse -i -dump -in /tmp/temp.pem  | awk -F ':' '/X509v3 Subject Alternative Name/ {getline; print $1}') | awk -F ':' '/UTF8STRING/{print $4}')"
-echo "UPN: $UPN"
+# Get User Principle Name from Certificate for PIV Authentication: 
+UPN="$(/usr/bin/openssl asn1parse -i -dump -in "$tmpdir/$piv_path" -strparse $(/usr/bin/openssl asn1parse -i -dump -in "$tmpdir/$piv_path"  | /usr/bin/awk -F ':' '/X509v3 Subject Alternative Name/ {getline; print $1}') | /usr/bin/awk -F ':' '/UTF8STRING/{print $4}')"
+# echo "UPN: $UPN"
 
-if [[ -e /tmp/temp.pem ]]; then
-    rm /tmp/temp.pem
-fi
+# Clean up the temporary directory
+/bin/rm -rf $tmpdir
 }
 
 createAltSecId (){
