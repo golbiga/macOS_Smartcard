@@ -27,6 +27,7 @@ fi
 /usr/bin/defaults write "$bootVolumeName"/var/db/dslocal/nodes/Default/users/"$uid" SmartCardEnforcement -array-add 2
 
 # Disable SmartCardEnforcement by setting it in User account:
+arch=$(/usr/bin/arch)
 if [[ "$arch" == "arm64" ]]; then
     /usr/sbin/diskutil apfs updatePreboot "$bootVolumeName" >/dev/null
 fi
