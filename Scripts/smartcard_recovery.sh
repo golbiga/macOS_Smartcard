@@ -17,7 +17,7 @@ if [[ -z "$bootVolumeName" ]]; then
 fi
 
 # Check if user is already exempt:
-userExempt=$(/usr/bin/defaults read "$bootVolumeName"/var/db/dslocal/nodes/Default/users/"$uid" SmartCardEnforcement | /usr/bin/awk 'NR==2' | /usr/bin/sed 's/^[ \t]*//')
+userExempt=$(/usr/bin/defaults read "$bootVolumeName"/var/db/dslocal/nodes/Default/users/"$uid" SmartCardEnforcement 2>/dev/null | /usr/bin/awk 'NR==2' | /usr/bin/sed 's/^[ \t]*//')
 if [[ "$userExempt" == "2" ]]; then
   echo "$uid is already exempt."
   exit 0
