@@ -6,7 +6,7 @@
 #           2018-05-30 Initial Script
 
 # Check for logged in user.
-currentUser="$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )"
+AUID="$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )"
 
 # get id
 AUID_UID=$(id -u $AUID)
@@ -16,10 +16,10 @@ arch=$(arch)
 
 # Check for pairing
 checkForPaired (){
-  tokenCheck=$(/usr/bin/dscl . read /Users/"$currentUser" AuthenticationAuthority | grep -c tokenidentity)
+  tokenCheck=$(/usr/bin/dscl . read /Users/"$AUID" AuthenticationAuthority | grep -c tokenidentity)
     if [[ "$tokenCheck" > 0 ]]; then
-      echo "Unpair $currentUser"
-      /usr/sbin/sc_auth unpair -u "$currentUser"
+      echo "Unpair $AUID"
+      /usr/sbin/sc_auth unpair -u "$AUID"
     else
       echo "Nothing Paired"
     fi
@@ -52,17 +52,17 @@ UPN="$(/usr/bin/openssl asn1parse -i -dump -in "$tmpdir/$piv_path" -strparse $(/
 }
 
 createAltSecId (){
-  altSecCheck=$(/usr/bin/dscl . -read /Users/"$currentUser" AltSecurityIdentities 2>/dev/null | sed -n 's/.*Kerberos:\([^ ]*\).*/\1/p')
+  altSecCheck=$(/usr/bin/dscl . -read /Users/"$AUID" AltSecurityIdentities 2>/dev/null | sed -n 's/.*Kerberos:\([^ ]*\).*/\1/p')
   if [[ "$UPN" = "" ]]; then
-    echo "No UPN found for $currentUser"
+    echo "No UPN found for $AUID"
     rv=$("/Library/Application Support/JAMF/bin/jamfHelper.app/Contents/MacOS/jamfHelper" -windowType utility -title "Smartcard Mapping" -description "Smartcard mapping was unsuccessful." -alignDescription center -button1 "Quit")
   elif [[ "$altSecCheck" = "$UPN" ]]; then
     echo "AltSec is already set to "$UPN""
     rv=$("/Library/Application Support/JAMF/bin/jamfHelper.app/Contents/MacOS/jamfHelper" -windowType utility -title "Smartcard Mapping" -description "Smartcard mapping was already set." -alignDescription center -button1 "Quit")
   else
     echo "Adding AltSecurityIdentities"
-    /usr/bin/dscl . -append /Users/"$currentUser" AltSecurityIdentities Kerberos:"$UPN"
-    rv=$("/Library/Application Support/JAMF/bin/jamfHelper.app/Contents/MacOS/jamfHelper" -windowType utility -title "Smartcard Mapping" -description "Successfully added $UPN to $currentUser." -alignDescription center -button1 "Quit")
+    /usr/bin/dscl . -append /Users/"$AUID" AltSecurityIdentities Kerberos:"$UPN"
+    rv=$("/Library/Application Support/JAMF/bin/jamfHelper.app/Contents/MacOS/jamfHelper" -windowType utility -title "Smartcard Mapping" -description "Successfully added $UPN to $AUID." -alignDescription center -button1 "Quit")
 fi
 }
 
