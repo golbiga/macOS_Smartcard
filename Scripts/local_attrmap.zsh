@@ -1,9 +1,18 @@
 #!/bin/zsh
 
-# Smartcard Attribute Mapping for Local Accounts 
+# Smartcard Attribute Mapping for Local Accounts
+# Version: 2.0
+# Changelog:2025-04-29 Added support for M1 systems, FileVault unlock, and check for SmartCardEnforcement Attribute (@brodjieski)
+#           2018-05-30 Initial Script
 
 # Check for logged in user.
 currentUser="$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )"
+
+# get id
+AUID_UID=$(id -u $AUID)
+
+# get architechture
+arch=$(arch)
 
 # Check for pairing
 checkForPaired (){
@@ -34,7 +43,7 @@ tmpdir=$(/usr/bin/mktemp -d)
 # Get path to Certificate for PIV Authentication:
 piv_path=$(ls "$tmpdir" | /usr/bin/grep '^Certificate For PIV')
 
-# Get User Principle Name from Certificate for PIV Authentication: 
+# Get User Principle Name from Certificate for PIV Authentication:
 UPN="$(/usr/bin/openssl asn1parse -i -dump -in "$tmpdir/$piv_path" -strparse $(/usr/bin/openssl asn1parse -i -dump -in "$tmpdir/$piv_path"  | /usr/bin/awk -F ':' '/X509v3 Subject Alternative Name/ {getline; print $1}') | /usr/bin/awk -F ':' '/UTF8STRING/{print $4}')"
 # echo "UPN: $UPN"
 
@@ -76,9 +85,7 @@ if [ ! -f /etc/SmartcardLogin.plist ];then
           <string>dsAttrTypeStandard:AltSecurityIdentities</string>
      </dict>
      <key>TrustedAuthorities</key>
-	   <array>
-		  <string></string>
-	   </array>
+	   <array/>
      <key>NotEnforcedGroup</key>
      <string></string>
 </dict>
@@ -87,8 +94,28 @@ Attr_Mapping
 fi
 }
 
+enableFileVault () {
+#get hash from PIV
+hash=$(sc_auth identities | awk '/PIV/ {print $1}')
+
+# set filevault
+launchctl asuser $AUID_UID sudo -u $AUID sc_auth filevault -o enable -u $AUID -h $hash
+dscl . -append /Users/$AUID AuthenticationAuthority ";amidentity;$hash"
+diskutil apfs updatePreboot /
+
+}
+
+
 prompt
 checkForPaired
 getUPN
+
+if [[ $arch == "arm64" ]];then
+  enableFileVault
+fi
+
 createAltSecId
 createMapping
+
+# remove any existing values for SmartCardEnforcement
+dscl . -delete /Users/$AUID SmartCardEnforcement
